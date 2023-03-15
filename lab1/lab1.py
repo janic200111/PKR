@@ -47,15 +47,17 @@ def decrypt(text,matrix):
 
     return detext
 
-key = "kamil"
-text = "Ala ma kota i psa"
+key = "janeczek"
+text = "Ala ma kota i pieska"
 
-key = key.upper().replace(" ", "").translate(str.maketrans("", "", string.punctuation))
-text = text.upper().replace(" ", "").translate(str.maketrans("", "", string.punctuation))
+key = key.upper().replace(" ", "")
+text = text.upper().replace(" ", "")
+key = key.replace('J','I')
+text = text.replace('J','I')
 key=remove_duplicates(key)
 alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
 for i in key:
-    if alphabet.find(i) < len(alphabet):
+    if i in alphabet:
         alphabet=alphabet.replace(i,'')
         
 key += alphabet
