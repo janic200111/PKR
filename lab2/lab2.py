@@ -49,10 +49,6 @@ def poker_test(wyn):
         sum=sum + wyst[i]*wyst[i] 
     print("Test pokerowy", (16/5000)*sum-5000 )
 
-
-
-
-
 p=gen_prime(5,True)
 q=gen_prime(5,True)
 n=p*q

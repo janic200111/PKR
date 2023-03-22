@@ -15,9 +15,10 @@ def gen_prime(len,check_mod):
         rand_num=random.randint(min_val, max_val)
     return rand_num
 
-n=gen_prime(4,False)
+n=gen_prime(5,False)
 g=0
 for i in range(2,n):
+    print(i)
     reszt=[]
     done=True
     for j in range(1,n):
