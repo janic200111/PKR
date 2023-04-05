@@ -44,7 +44,7 @@ def time_of_sha512(tekst):
 
 tekst = Path('test.txt').read_text(encoding='utf-8')
 
-x_values=[100,500,1000,2000,3000,4000,5000]
+x_values=[500,2500,10000]
 val={
     'md5':[],
     'sha256':[],
@@ -59,16 +59,13 @@ for i in x_values:
     val['sha512'].append(time_of_sha512(tekst1))
 print(val)
 
+for y in val:
+    plt.plot(x_values, val[y])
+    plt.text(x_values[-1], val[y][-1], y)
 
-for y_values in val.values():
-    plt.plot(x_values, y_values)
-
-# Dodanie etykiet osi X i Y oraz tytułu wykresu
 plt.xlabel('Oś X')
 plt.ylabel('Oś Y')
-plt.title('Wykres na podstawie słownika')
-
-# Wyświetlenie wykresu
+plt.title('Czasy dla różnych funkcji')
 plt.show()
 
 
