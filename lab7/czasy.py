@@ -1,56 +1,74 @@
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 import base64
 import time
 from pathlib import Path
 import matplotlib.pyplot as plt
 import os
+from decimal import *
+getcontext().prec = 50
 
-def time_of_ECB(tekst,key):
-
-    start_time = time.time()
-
-    cipher = AES.new(key, AES.MODE_ECB)
-    ciphertext = cipher.encrypt(pad(tekst, AES.block_size))
-
-    end_time = time.time()  
-    elapsed_time = end_time - start_time
+def encrypt_decrypt_time(tekst, key, iv, block_cipher_mode, operation):
 
     start_time = time.time()
+    if block_cipher_mode == 'ECB':
+        cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+    elif block_cipher_mode == 'CBC':
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    elif block_cipher_mode == 'OFB':
+        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=default_backend())
+    elif block_cipher_mode == 'CFB':
+        cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    elif block_cipher_mode == 'CTR':
+        cipher = Cipher(algorithms.AES(key), modes.CTR(iv), backend=default_backend())
+    
+    if operation == 'encrypt':
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(tekst) + encryptor.finalize()
+    elif operation == 'decrypt':
+        decryptor = cipher.decryptor()
+        ciphertext = decryptor.update(tekst) + decryptor.finalize()
+    
+    end_time = time.time()
+    print( start_time, end_time)
+    return Decimal(end_time - start_time)
+        
 
-    decryptedtext = unpad(cipher.decrypt(ciphertext), AES.block_size)
-
-    end_time = time.time() 
-    elapsed_time1 = end_time - start_time
-
-    return elapsed_time,elapsed_time1
+tekst = Path('test.txt').read_bytes()
+key = os.urandom(32)
+iv = os.urandom(16)
 
 
-tekst = Path('test.txt').read_text(encoding='utf-8')
-key = os.urandom(16)
-print(time_of_ECB(tekst,key))
-"""
-x_values=[500,2500,10000]
-val={
-    'md5':[],
-    'sha256':[],
-    'sha512':[]
+x_values=[1000,5000,10000]
+val_of_encrypt={
+    'ECB':[],
+    'CBC':[],
+    'OFB':[],
+    'CFB' : [],
+    'CTR' :[]
 }
+val_of_decrypt={
+    'ECB':[],
+    'CBC':[],
+    'OFB':[],
+    'CFB' : [],
+    'CTR' :[]
+}
+modess=['CTR','ECB','CBC','OFB','CFB']
 for i in x_values:
-    tekst1=""
-    for j in range(i):
-        tekst1+=tekst
-    val['md5'].append(time_of_md5(tekst1))
-    val['sha256'].append(time_of_sha256(tekst1))
-    val['sha512'].append(time_of_sha512(tekst1))
-print(val)
-
-for y in val:
-    plt.plot(x_values, val[y])
-    plt.text(x_values[-1], val[y][-1], y)
-
-plt.xlabel('Oś X')
-plt.ylabel('Oś Y')
-plt.title('Czasy dla różnych funkcji')
-plt.show()
-"""
+    for mode in modess:
+        tekst1=tekst
+        for j in range(i-1):
+            tekst1+=tekst
+        val_of_encrypt[mode].append(encrypt_decrypt_time(tekst1,key,iv,mode,"encrypt"))
+        val_of_decrypt[mode].append(encrypt_decrypt_time(tekst1,key,iv,mode,"decrypt"))
+for y in val_of_encrypt:
+    plt.plot(x_values, val_of_encrypt[y])
+    plt.text(x_values[-1], val_of_encrypt[y][-1], "szyfrowanie")
+    plt.plot(x_values, val_of_decrypt[y])
+    plt.text(x_values[-1], val_of_decrypt[y][-1], "deszyfrowanie")
+    plt.xlabel('Oś X')
+    plt.ylabel('Oś Y')
+    st = 'Czasy dla szyfrowania i deszyfrowania dla ' + y
+    plt.title(st)
+    plt.show()
